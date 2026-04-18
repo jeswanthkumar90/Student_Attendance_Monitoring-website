@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Parent Signup</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #adeaf8, #f4f6f8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .signup-box {
+            width: 520px;
+            background: #fafbfa;
+            padding: 35px;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(7,7,7,0.2);
+        }
+
+        .signup-logo {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .signup-logo img {
+            height: 70px;
+        }
+
+        .signup-box h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #2e7d32;
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #c0bfbf;
+            font-size: 15px;
+        }
+
+        textarea {
+            resize: none;
+            height: 70px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            font-size: 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        .submit-btn:hover {
+            background-color: #43a047;
+        }
+
+        .login-text {
+            margin-top: 18px;
+            text-align: center;
+            font-size: 15px;
+        }
+
+        .login-text a {
+            color: #4CAF50;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .login-text a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<div class="signup-box">
+
+    <div class="signup-logo">
+        <img src="https://hubs.fi/wp-content/uploads/2021/08/Brightlife-logo.png" alt="Logo">
+    </div>
+
+    <h2>Parent Signup</h2>
+
+    <form id="parentSignupForm">
+
+        <div class="form-group">
+            <label>Parent Name</label>
+            <input type="text" name="parent_name" required>
+        </div>
+
+        <div class="form-group">
+            <label>Phone Number</label>
+            <input type="tel" name="phone" required>
+        </div>
+
+        <div class="form-group">
+            <label>Email</label>
+            <input type="email" name="email" required>
+        </div>
+
+        <div class="form-group">
+            <label>Child Roll Number</label>
+            <input type="text" name="child_roll_no" required>
+        </div>
+
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" name="password" required>
+        </div>
+
+        <div class="form-group">
+            <label>Address</label>
+            <textarea name="address"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label>Type of Parent</label>
+            <select name="parent_type" required>
+                <option value="">Select</option>
+                <option value="Father">Father</option>
+                <option value="Mother">Mother</option>
+            </select>
+        </div>
+
+        <button type="submit" class="submit-btn">Signup</button>
+
+    </form>
+
+    <p class="login-text">
+        Already registered? <a href="Par_Login.html">Login</a>
+    </p>
+
+</div>
+
+<script>
+document.getElementById("parentSignupForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const formData = {
+        parent_name: this.parent_name.value,
+        phone: this.phone.value,
+        email: this.email.value,
+        child_roll_no: this.child_roll_no.value,
+        password: this.password.value,
+        address: this.address.value,
+        parent_type: this.parent_type.value
+    };
+
+    try {
+        const response = await fetch("http://localhost:3000/parent-signup", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(formData)
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            alert("Signup successful! Please login.");
+            window.location.href = "Par_Login.html";
+        } else {
+            alert(result.message || "Signup failed");
+        }
+    } catch (error) {
+        alert("Server error. Please try again.");
+    }
+});
+</script>
+
+</body>
+</html>

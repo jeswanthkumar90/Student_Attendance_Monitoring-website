@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Teacher Profile</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background:
+        linear-gradient(rgba(255,255,255,0.432), rgba(255,255,255,0.409)),
+        url("https://images.unsplash.com/photo-1529070538774-1843cb3265df")
+        no-repeat center center fixed;
+    background-size: cover;
+}
+
+header {
+    background-color: rgba(255,255,255,0.9);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 30px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.logo-section {
+    display: flex;
+    flex-direction: column;
+}
+
+.logo-section img {
+    height: 40px;
+}
+
+.logo-section span {
+    font-size: 14px;
+    font-weight: bold;
+    margin-top: 4px;
+}
+
+nav ul {
+    list-style: none;
+    display: flex;
+    gap: 22px;
+}
+
+nav ul li {
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: bold;
+}
+
+nav ul li:hover {
+    color: #4CAF50;
+}
+
+.logout {
+    color: red;
+}
+
+.container {
+    padding: 40px;
+    display: flex;
+    justify-content: center;
+}
+
+.card {
+    position: relative;
+    width: 900px;
+    padding: 50px 40px;
+    border-radius: 18px;
+
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.2);
+    backdrop-filter: blur(6px);
+
+    box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+    text-align: center;
+}
+
+.profile-photo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.profile-photo img {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    border: 5px solid #4CAF50;
+    object-fit: cover;
+}
+
+.profile-photo label {
+    margin-top: 10px;
+    cursor: pointer;
+    color: #2e7d32;
+    font-weight: bold;
+}
+
+.profile-photo input {
+    display: none;
+}
+
+.details {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.detail-item {
+    font-size: 16px;
+}
+
+.detail-item strong {
+    color: #2e7d32;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <div class="logo-section">
+        <img src="https://hubs.fi/wp-content/uploads/2021/08/Brightlife-logo.png">
+        <span>Teacher</span>
+    </div>
+
+    <nav>
+        <ul>
+            <li onclick="location.href='Tea_home.html'">Home</li>
+            <li>Profile</li>
+            <li>Attendance</li>
+            <li>Subjects Handling</li>
+            <li>Student Analysis</li>
+            <li class="logout" onclick="logout()">Logout</li>
+        </ul>
+    </nav>
+</header>
+
+<div class="container">
+<div class="card">
+
+    <div class="profile-photo">
+        <img id="profileImg"
+             src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
+        <label for="photoUpload">Change Photo</label>
+        <input type="file" id="photoUpload" accept="image/*">
+    </div>
+
+    <div class="details">
+        <div class="detail-item"><strong>Teacher ID:</strong> <span id="teacher_id"></span></div>
+        <div class="detail-item"><strong>Name:</strong> <span id="teacher_name"></span></div>
+        <div class="detail-item"><strong>Email:</strong> <span id="teacher_email"></span></div>
+        <div class="detail-item"><strong>Phone:</strong> <span id="phone"></span></div>
+        <div class="detail-item"><strong>Date of Birth:</strong> <span id="dob"></span></div>
+        <div class="detail-item"><strong>Gender:</strong> <span id="gender"></span></div>
+        <div class="detail-item"><strong>Age:</strong> <span id="age"></span></div>
+        <div class="detail-item"><strong>Address:</strong> <span id="address"></span></div>
+    </div>
+
+</div>
+</div>
+
+<script>
+const teacherEmail = localStorage.getItem("teacherEmail");
+const profileImg = document.getElementById("profileImg");
+
+if (!teacherEmail) {
+    alert("Session expired");
+    window.location.href = "Tea_Login.html";
+}
+
+profileImg.src = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+
+fetch(`http://localhost:3000/teacher/${encodeURIComponent(teacherEmail)}`)
+.then(res => res.json())
+.then(data => {
+
+    if (data.profile_photo) {
+        profileImg.src = `http://localhost:3000${data.profile_photo}`;
+    }
+
+    teacher_id.innerText     = data.teacher_id || "-";
+    teacher_name.innerText   = data.teacher_name || "-";
+    teacher_email.innerText  = data.email || "-";
+    phone.innerText          = data.phone || "-";
+    dob.innerText            = data.dob_formatted || "-";
+    gender.innerText         = data.gender || "-";
+    age.innerText            = data.age || "-";
+    address.innerText        = data.address || "-";
+});
+
+photoUpload.addEventListener("change", async e => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("photo", file);
+
+    const res = await fetch(
+        `http://localhost:3000/teacher/upload-photo/${encodeURIComponent(teacherEmail)}`,
+        { method: "POST", body: formData }
+    );
+
+    const data = await res.json();
+    if (data.photo) {
+        profileImg.src = `http://localhost:3000${data.photo}`;
+    }
+});
+
+function logout() {
+    localStorage.removeItem("teacherEmail");
+    window.location.href = "Index.html";
+}
+</script>
+
+</body>
+</html>

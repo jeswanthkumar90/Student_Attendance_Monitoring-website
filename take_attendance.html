@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Take Attendance</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background:
+        linear-gradient(rgba(255,255,255,0.432), rgba(255,255,255,0.409)),
+        url("https://images.unsplash.com/photo-1529070538774-1843cb3265df")
+        no-repeat center center fixed;
+    background-size: cover;
+}
+
+.container {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 30px;
+}
+
+#studentList {
+    width: 40%;
+    background: rgba(255,255,255,0.8);
+    padding: 20px;
+    border-radius: 10px;
+    text-align: left;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.student {
+    padding: 8px;
+    margin-bottom: 5px;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    justify-content: space-between;
+}
+
+.present {
+    color: green;
+    font-weight: bold;
+}
+
+.absent {
+    color: red;
+    font-weight: bold;
+}
+
+video {
+    border: 3px solid #4CAF50;
+    border-radius: 10px;
+}
+
+button {
+    padding: 12px 25px;
+    font-size: 16px;
+    margin-top: 10px;
+}
+
+</style>
+</head>
+
+<body>
+
+<h2>Take Attendance</h2>
+
+<div class="container">
+
+    <div id="studentList">
+        <h3>Student List</h3>
+        <div id="studentsContainer"></div>
+    </div>
+
+    <div>
+        <video id="video" width="400" height="300" autoplay playsinline></video><br><br>
+        <button onclick="scanFace()">Scan Face</button><br>
+        <button onclick="submitAttendance()">Submit Attendance</button>
+        <p id="result"></p>
+    </div>
+
+</div>
+
+<canvas id="canvas" style="display:none;"></canvas>
+
+<script>
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    const teacherEmail = localStorage.getItem("teacherEmail");
+
+    if (!teacherEmail) {
+        alert("Session expired. Please login again.");
+        window.location.href = "Tea_Login.html";
+        return;
+    }
+
+    let subject = "";
+    let students = [];
+
+    console.log("Teacher Email:", teacherEmail);
+
+    fetch(`/teacher-subject/${encodeURIComponent(teacherEmail)}`)
+    .then(res => res.json())
+    .then(data => {
+
+        if (!data.subject) {
+            alert("No subject assigned to this teacher.");
+            return;
+        }
+
+        subject = data.subject;
+        loadStudents();
+    })
+    .catch(err => {
+        console.error("Subject load error:", err);
+        alert("Unable to load subject.");
+    });
+
+    function loadStudents() {
+
+        fetch(`/students-by-subject/${encodeURIComponent(subject)}`)
+        .then(res => res.json())
+        .then(data => {
+
+            if (!Array.isArray(data) || data.length === 0) {
+                document.getElementById("studentsContainer").innerHTML =
+                    "<p>No students registered for this subject.</p>";
+                return;
+            }
+
+            students = data.map(s => ({
+                roll_no: s.roll_no,
+                full_name: s.full_name,
+                status: "Absent"
+            }));
+
+            renderStudents();
+        })
+        .catch(err => {
+            console.error("Student load error:", err);
+            alert("Unable to load students.");
+        });
+    }
+
+    function renderStudents() {
+
+        const container = document.getElementById("studentsContainer");
+        container.innerHTML = "";
+
+        students.forEach(student => {
+            container.innerHTML += `
+                <div class="student">
+                    <span>${student.roll_no} - ${student.full_name}</span>
+                    <span id="status-${student.roll_no}" class="absent">
+                        ${student.status}
+                    </span>
+                </div>
+            `;
+        });
+    }
+
+    const video = document.getElementById("video");
+
+    navigator.mediaDevices.getUserMedia({ video: true })
+    .then(stream => video.srcObject = stream)
+    .catch(() => alert("Camera access denied"));
+
+
+    window.scanFace = function() {
+
+        const canvas = document.getElementById("canvas");
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(video, 0, 0);
+
+        canvas.toBlob(blob => {
+
+            const formData = new FormData();
+            formData.append("image", blob);
+
+            fetch("http://localhost:3000/face-recognize", {
+    method: "POST",
+    body: formData
+})
+            .then(res => res.json())
+            .then(data => {
+
+                if (data.status === "Present") {
+
+                    const roll = data.roll;
+
+                    const student = students.find(s => s.roll_no == roll);
+
+                    if (student) {
+                        student.status = "Present";
+
+                        const statusElement = document.getElementById(`status-${roll}`);
+                        if (statusElement) {
+                            statusElement.innerText = "Present";
+                            statusElement.className = "present";
+                        }
+
+                        document.getElementById("result").innerText =
+                            ` ${data.name} (${data.roll}) Present`;
+
+                    } else {
+                        alert("Recognized student not in this subject list.");
+                    }
+
+                } else {
+                    document.getElementById("result").innerText = " Unknown Face";
+                }
+
+            })
+            .catch(err => {
+                console.error("Face recognition error:", err);
+                alert("Face recognition failed.");
+            });
+
+        }, "image/jpeg");
+    };
+
+    window.submitAttendance = function() {
+
+        if (!subject) {
+            alert("Subject not loaded.");
+            return;
+        }
+
+        fetch("/save-attendance", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                subject,
+                attendance: students
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            alert(data.message);
+        })
+        .catch(err => {
+            console.error("Save error:", err);
+            alert("Failed to save attendance.");
+        });
+    };
+
+});
+</script>
+
+</body>
+</html>

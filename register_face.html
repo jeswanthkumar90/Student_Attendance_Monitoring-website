@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Register Face</title>
+
+<style>
+body {
+    font-family: Arial;
+    text-align: center;
+    background: #f4f6f8;
+}
+video {
+    border: 3px solid #2196F3;
+    border-radius: 10px;
+}
+input {
+    padding: 10px;
+    font-size: 15px;
+    width: 220px;
+}
+button {
+    padding: 12px 25px;
+    font-size: 16px;
+    margin-top: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<h2>Register Face</h2>
+
+<input type="text" id="roll" placeholder="Roll Number"><br><br>
+<input type="text" id="name" placeholder="Name"><br><br>
+
+<video id="video" width="400" height="300" autoplay playsinline></video><br><br>
+
+<button onclick="registerFace()">Capture & Register</button>
+
+<canvas id="canvas" width="400" height="300" style="display:none;"></canvas>
+
+<script>
+const video = document.getElementById("video");
+
+navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
+.then(stream => video.srcObject = stream)
+.catch(() => alert(" Camera access denied"));
+
+function registerFace() {
+    const roll = document.getElementById("roll").value.trim();
+    const name = document.getElementById("name").value.trim();
+
+    if (!roll || !name) {
+        alert(" Please enter Roll Number and Name");
+        return;
+    }
+
+    const canvas = document.getElementById("canvas");
+    canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    canvas.toBlob(blob => {
+        const formData = new FormData();
+        formData.append("roll", roll);
+        formData.append("name", name);
+        formData.append("image", blob);
+
+        fetch("http://127.0.0.1:5000/register-face", {
+            method: "POST",
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => alert(data.message))
+        .catch(() => alert(" Server error"));
+    }, "image/jpeg");
+}
+</script>
+
+</body>
+</html>

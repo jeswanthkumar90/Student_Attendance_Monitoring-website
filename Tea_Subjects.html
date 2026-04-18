@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Subjects Handling</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background:
+        linear-gradient(rgba(255,255,255,0.432), rgba(255,255,255,0.409)),
+        url("https://images.unsplash.com/photo-1529070538774-1843cb3265df")
+        no-repeat center center fixed;
+    background-size: cover;
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+    padding: 60px;
+}
+
+.card {
+    width: 600px;
+    padding: 40px;
+    border-radius: 18px;
+    background: rgba(255,255,255,0.2);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+    text-align: center;
+}
+
+h2 {
+    margin-bottom: 25px;
+}
+
+select {
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+    border-radius: 6px;
+}
+
+button {
+    margin-top: 20px;
+    padding: 12px 30px;
+    font-size: 16px;
+    border: none;
+    background: #4CAF50;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.subject-box {
+    margin-top: 20px;
+    padding: 18px;
+    font-size: 22px;
+    color: #2e7d32;
+    font-weight: bold;
+    border: 2px solid #4CAF50;
+    border-radius: 10px;
+    background: rgba(76, 175, 80, 0.12);
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<div class="card">
+
+<h2>Subject Handling</h2>
+
+<div id="selectSection">
+    <select id="subjectSelect">
+        <option value="">-- Select Subject --</option>
+        <option value="Telugu">Telugu</option>
+        <option value="Hindi">Hindi</option>
+        <option value="English">English</option>
+        <option value="Maths">Maths</option>
+        <option value="Physics">Physics</option>
+        <option value="Chemistry">Chemistry</option>
+        <option value="Biology">Biology</option>
+        <option value="Social">Social</option>
+    </select>
+
+    <button onclick="saveSubject()">Save Subject</button>
+</div>
+
+<div id="displaySection" style="display:none">
+    <div class="subject-box" id="subjectText"></div>
+</div>
+
+</div>
+</div>
+
+<script>
+const teacherEmail = localStorage.getItem("teacherEmail");
+
+if (!teacherEmail) {
+    alert("Session expired. Please login again.");
+    window.location.href = "Tea_Login.html";
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    loadSubject();
+});
+
+function loadSubject() {
+    fetch(`http://localhost:3000/teacher-subject/${encodeURIComponent(teacherEmail)}`)
+        .then(res => {
+            if (!res.ok) throw new Error("Fetch failed");
+            return res.json();
+        })
+        .then(data => {
+            if (data.subject) {
+                lockSubject(data.subject);
+            }
+        })
+        .catch(err => {
+            console.error("Load subject error:", err);
+            alert("Unable to load subject. Please try again.");
+        });
+}
+
+function saveSubject() {
+    const subject = document.getElementById("subjectSelect").value;
+
+    if (!subject) {
+        alert("Please select a subject");
+        return;
+    }
+
+    fetch(`http://localhost:3000/teacher-subject/${encodeURIComponent(teacherEmail)}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ subject })
+    })
+    .then(res => res.json().then(data => ({ ok: res.ok, data })))
+    .then(({ ok, data }) => {
+        if (!ok) {
+            alert(data.message || "Subject already selected");
+            return;
+        }
+        lockSubject(data.subject);
+    })
+    .catch(err => {
+        console.error("Save subject error:", err);
+        alert("Server error while saving subject");
+    });
+}
+
+function lockSubject(subject) {
+    document.getElementById("selectSection").style.display = "none";
+    document.getElementById("displaySection").style.display = "block";
+    document.getElementById("subjectText").innerText =
+        `You are handling subject: ${subject}`;
+}
+</script>
+
+
+</body>
+</html>

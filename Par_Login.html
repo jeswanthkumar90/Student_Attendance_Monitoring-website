@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Parent Login</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            height: 100vh;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(to right, #c9eef9, #f4f5f7);
+        }
+
+        .login-box {
+            width: 420px;
+            min-height: 480px;
+            padding: 35px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        .login-logo img {
+            height: 80px;
+            margin-bottom: 15px;
+        }
+
+        .login-box h2 {
+            margin-bottom: 25px;
+            color: #2e7d32;
+        }
+
+        .login-box input {
+            width: 100%;
+            padding: 14px;
+            margin: 12px 0;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+
+        .login-box button {
+            width: 100%;
+            padding: 14px;
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            font-size: 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        .login-box button:hover {
+            background-color: #43a047;
+        }
+
+        .signup-text {
+            margin-top: 20px;
+            font-size: 15px;
+        }
+
+        .signup-text a {
+            color: #4CAF50;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .signup-text a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="login-box">
+
+    <div class="login-logo">
+        <img src="https://hubs.fi/wp-content/uploads/2021/08/Brightlife-logo.png" alt="Logo">
+    </div>
+
+    <h2>Parent Login</h2>
+
+    <input type="email" id="email" placeholder="Email" required>
+    <input type="password" id="password" placeholder="Password" required>
+
+    <button onclick="parentLogin()">Login</button>
+
+    <p class="signup-text">
+        New parent? <a href="Par_Signup.html">Signup</a>
+    </p>
+
+</div>
+
+<script>
+
+async function parentLogin() {
+
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
+
+    if (!email || !password) {
+        alert("Please enter email and password");
+        return;
+    }
+
+    try {
+
+        const response = await fetch("http://localhost:3000/parent-login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            alert(data.message || "Login failed");
+            return;
+        }
+
+        console.log("Login response:", data);
+
+        localStorage.setItem("parentEmail", data.email);
+        localStorage.setItem("childRoll", data.child_roll_no);
+        localStorage.setItem("parentType", data.parent_type);
+
+        window.location.href = "Par_home.html";
+
+    } catch (error) {
+
+        console.error(error);
+        alert("Server error. Please try again.");
+
+    }
+}
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Register Face</title>
+
+<style>
+body {
+    font-family: Arial;
+    text-align: center;
+    background: #f4f6f8;
+}
+video {
+    border: 3px solid #2196F3;
+    border-radius: 10px;
+}
+input {
+    padding: 10px;
+    font-size: 15px;
+    width: 220px;
+}
+button {
+    padding: 12px 25px;
+    font-size: 16px;
+    margin-top: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<h2>Register Face</h2>
+
+<input type="text" id="roll" placeholder="Roll Number"><br><br>
+<input type="text" id="name" placeholder="Name"><br><br>
+
+<video id="video" width="400" height="300" autoplay playsinline></video><br><br>
+
+<button onclick="registerFace()">Capture & Register</button>
+
+<canvas id="canvas" width="400" height="300" style="display:none;"></canvas>
+
+<script>
+const video = document.getElementById("video");
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+navigator.mediaDevices.getUserMedia({ video: true })
+.then(stream => {
+    video.srcObject = stream;
+})
+.catch(err => {
+    alert("Camera error");
+    console.error(err);
+});
+
+function registerFace() {
+    const roll = document.getElementById("roll").value.trim();
+    const name = document.getElementById("name").value.trim();
+
+    if (!roll || !name) {
+        alert("Enter roll number and name");
+        return;
+    }
+
+    if (video.videoWidth === 0 || video.videoHeight === 0) {
+        alert("Camera not ready yet. Please wait.");
+        return;
+    }
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    const dataURL = canvas.toDataURL("image/jpeg", 0.95);
+
+    fetch("/register-face", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            roll: roll,
+            name: name,
+            image: dataURL
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert(data.message || data.error);
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Server error");
+    });
+}
+</script>
+
+</body>
+</html>

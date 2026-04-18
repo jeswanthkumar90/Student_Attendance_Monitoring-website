@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Parent Home</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #c9eef9, #f4f5f7);
+        }
+
+        header {
+            background-color: rgba(255,255,255,0.9);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 30px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .logo-section {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo-section img {
+            height: 40px;
+        }
+
+        .logo-section span {
+            font-size: 14px;
+            font-weight: bold;
+            margin-top: 4px;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 22px;
+        }
+
+        nav ul li {
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        nav ul li:hover {
+            color: #2196F3;
+        }
+
+        .logout {
+            color: red;
+        }
+
+        .container {
+            padding: 40px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .card {
+            position: relative;
+            width: 900px;
+            padding: 60px 40px;
+            border-radius: 18px;
+
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(8px);
+
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+            text-align: center;
+            overflow: hidden;
+        }
+
+        .card-logo {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 600px;
+            opacity: 0.18;
+            transform: translate(-50%, -50%);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .card h2,
+        .details {
+            position: relative;
+            z-index: 2;
+        }
+
+        .card h2 {
+            margin-bottom: 30px;
+            color: #0d47a1;
+        }
+
+        .details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .detail-item {
+            font-size: 16px;
+            text-align: center;
+        }
+
+        .detail-item strong {
+            color: #0d47a1;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo-section">
+        <img src="https://hubs.fi/wp-content/uploads/2021/08/Brightlife-logo.png">
+        <span>Parent</span>
+    </div>
+
+    <nav>
+        <ul>
+            <li>Home</li>
+            <li onclick="profile()">Profile</li>
+            <li onclick="suggestion()">Child Suggestions</li>
+            <li onclick="subjects()">Subject of Child</li>
+            <li class="logout" onclick="logout()">Logout</li>
+        </ul>
+    </nav>
+</header>
+
+<div class="container">
+    <div class="card">
+
+        <img
+            class="card-logo"
+            src="https://hubs.fi/wp-content/uploads/2021/08/Brightlife-logo.png"
+            alt="Logo"
+        >
+
+        <h2>Parent Details</h2>
+
+        <div class="details">
+            <div class="detail-item"><strong>Parent Name:</strong> <span id="parent_name"></span></div>
+            <div class="detail-item"><strong>Parent Type:</strong> <span id="parent_type"></span></div>
+
+            <div class="detail-item"><strong>Email:</strong> <span id="email"></span></div>
+            <div class="detail-item"><strong>Phone:</strong> <span id="phone"></span></div>
+
+            <div class="detail-item"><strong>Child Roll No:</strong> <span id="child_roll_no"></span></div>
+            <div class="detail-item"><strong>Address:</strong> <span id="address"></span></div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+const parentEmail = localStorage.getItem("parentEmail");
+
+if (!parentEmail) {
+    alert("Please login again");
+    window.location.href = "Par_Login.html";
+}
+
+fetch(`http://localhost:3000/parent/${encodeURIComponent(parentEmail)}`)
+    .then(res => {
+        if (!res.ok) throw new Error();
+        return res.json();
+    })
+    .then(data => {
+        document.getElementById("parent_name").innerText = data.parent_name || "-";
+        document.getElementById("parent_type").innerText = data.parent_type || "-";
+        document.getElementById("email").innerText = data.email || "-";   // ✅ FIXED
+        document.getElementById("phone").innerText = data.phone || "-";
+        document.getElementById("child_roll_no").innerText = data.child_roll_no || "-";
+        document.getElementById("address").innerText = data.address || "-";
+    })
+    .catch(() => {
+        alert("Failed to load parent details");
+    });
+
+function logout() {
+    localStorage.removeItem("parentEmail");
+    window.location.href = "Index.html";
+}
+function profile() {
+    window.location.href = "Par_Profile.html";
+}
+function subjects() {
+    window.location.href = "Par_C_subjects.html";
+}
+function suggestion() {
+    window.location.href = "Par_child_suggestion.html";
+}
+</script>
+
+
+</body>
+</html>

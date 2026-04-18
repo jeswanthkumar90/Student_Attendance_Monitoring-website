@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Student Signup</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #c9f9cd, #f4f6f8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .signup-box {
+            width: 540px;
+            background: #fafbfa;
+            padding: 35px;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(7, 7, 7, 0.2);
+        }
+
+        .signup-logo {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .signup-logo img {
+            height: 70px;
+        }
+
+        .signup-box h2 {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #c0bfbf;
+            font-size: 15px;
+        }
+
+        textarea {
+            resize: none;
+            height: 70px;
+        }
+
+        .gender-group {
+            display: flex;
+            gap: 20px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            font-size: 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        .submit-btn:hover {
+            background-color: #43a047;
+        }
+    </style>
+</head>
+<body>
+
+<div class="signup-box">
+
+    <div class="signup-logo">
+        <img src="https://hubs.fi/wp-content/uploads/2021/08/Brightlife-logo.png" alt="Company Logo">
+    </div>
+
+    <h2>Student Signup</h2>
+
+    <form id="signupForm">
+
+        <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" name="full_name" required>
+        </div>
+
+        <div class="form-group">
+            <label>Roll No</label>
+            <input type="text" name="roll_no" required>
+        </div>
+
+        <div class="form-group">
+            <label>Email</label>
+            <input type="email" name="email" required>
+        </div>
+
+        <div class="form-group">
+            <label>Mobile No</label>
+            <input type="tel" name="mobile" required>
+        </div>
+
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" name="password" required>
+        </div>
+
+        <div class="form-group">
+            <label>Father Name</label>
+            <input type="text" name="father_name">
+        </div>
+
+        <div class="form-group">
+            <label>Mother Name</label>
+            <input type="text" name="mother_name">
+        </div>
+
+        <div class="form-group">
+            <label>Father Mobile No</label>
+            <input type="tel" name="father_mobile">
+        </div>
+
+        <div class="form-group">
+            <label>Mother Mobile No</label>
+            <input type="tel" name="mother_mobile">
+        </div>
+
+        <div class="form-group">
+            <label>Address</label>
+            <textarea name="address"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label>Date of Birth</label>
+            <input type="date" name="dob">
+        </div>
+
+        <div class="form-group">
+            <label>Gender</label>
+            <div class="gender-group">
+                <label><input type="radio" name="gender" value="Male"> Male</label>
+                <label><input type="radio" name="gender" value="Female"> Female</label>
+                <label><input type="radio" name="gender" value="Other"> Other</label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Age</label>
+            <input type="number" name="age" min="1">
+        </div>
+
+        <button type="submit" class="submit-btn">Signup</button>
+
+    </form>
+    
+    <p class="login-text">
+        Already registered? <a href="Stu_Login.html">Login</a>
+    </p>
+
+</div>
+
+<script>
+document.getElementById("signupForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const formData = {
+        full_name: this.full_name.value.trim(),
+        roll_no: this.roll_no.value.trim(),
+        email: this.email.value.trim(),
+        mobile: this.mobile.value.trim(),
+        password: this.password.value.trim(),
+        father_name: this.father_name.value.trim(),
+        mother_name: this.mother_name.value.trim(),
+        father_mobile: this.father_mobile.value.trim(),
+        mother_mobile: this.mother_mobile.value.trim(),
+        address: this.address.value.trim(),
+        dob: this.dob.value,
+        gender: this.gender.value,
+        age: this.age.value
+    };
+
+    try {
+        const response = await fetch("http://localhost:3000/student-signup", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(formData)
+        });
+
+        const text = await response.text();
+        console.log("RAW RESPONSE:", text);
+
+        let result;
+
+        try {
+            result = JSON.parse(text); 
+        } catch {
+            alert(" Server returned invalid response (not JSON)");
+            return;
+        }
+
+        if (!response.ok) {
+            alert(result.message || " Signup failed");
+            return;
+        }
+
+        alert(" Signup successful! Please login.");
+        window.location.href = "Stu_Login.html";
+
+    } catch (error) {
+        console.error("Fetch Error:", error);
+        alert(" Server error. Please check backend.");
+    }
+});
+</script>
+
+
+</body>
+</html>

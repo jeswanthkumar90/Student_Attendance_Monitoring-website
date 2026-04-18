@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Child Suggestion</title>
+
+<style>
+
+body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #c9eef9, #f4f5f7);
+            padding: 40px;
+            text-align: center;
+        }
+
+.card{
+width:300px;
+margin:auto;
+background:white;
+padding:25px;
+border-radius:10px;
+box-shadow:0 0 12px rgba(0,0,0,0.2);
+}
+
+.card img{
+width:90px;
+height:90px;
+border-radius:50%;
+object-fit:cover;
+margin-bottom:10px;
+}
+
+.name{
+font-size:18px;
+font-weight:bold;
+}
+
+.roll{
+color:#666;
+margin-bottom:10px;
+}
+
+.percent{
+font-size:22px;
+font-weight:bold;
+}
+
+.status{
+width:14px;
+height:14px;
+border-radius:50%;
+display:inline-block;
+margin-left:8px;
+}
+
+.green{background:#4CAF50;}
+.yellow{background:#FFC107;}
+.red{background:#F44336;}
+
+.suggestion{
+margin-top:15px;
+font-size:15px;
+color:#333;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h2>Child Suggestion</h2>
+
+<div id="childCard"></div>
+
+<script>
+
+const roll = localStorage.getItem("childRoll");
+
+fetch(`http://localhost:3000/child-analysis/${roll}`)
+.then(res=>res.json())
+.then(data=>{
+
+let color="green";
+let suggestion="Send child to school daily.";
+
+if(data.percentage < 65){
+
+color="red";
+
+suggestion=
+"Your child's attendance is low. Please ensure the child attends school regularly and spends at least 3-4 hours daily on study.";
+
+}
+else if(data.percentage < 80){
+
+color="yellow";
+
+suggestion=
+"Attendance is moderate. Encourage the child to attend classes regularly and spend at least 2-3 hours daily studying.";
+
+}
+
+const container=document.getElementById("childCard");
+
+container.innerHTML=`
+
+<div class="card">
+
+<img src="http://localhost:3000${data.profile_photo}">
+
+<div class="name">${data.full_name}</div>
+
+<div class="roll">Roll No: ${data.roll_no}</div>
+
+<div class="percent">
+
+${data.percentage}% 
+<span class="status ${color}"></span>
+
+</div>
+
+<div class="suggestion">
+
+${suggestion}
+
+</div>
+
+</div>
+
+`;
+
+});
+
+</script>
+
+</body>
+</html>

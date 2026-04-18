@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Teacher Home</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background:
+                linear-gradient(rgba(255, 255, 255, 0.432), rgba(255, 255, 255, 0.409)),
+                url("https://images.unsplash.com/photo-1529070538774-1843cb3265df")
+                no-repeat center center fixed;
+            background-size: cover;
+        }
+
+        header {
+            background-color: rgba(255,255,255,0.9);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 30px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .logo-section {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo-section img {
+            height: 40px;
+        }
+
+        .logo-section span {
+            font-size: 14px;
+            font-weight: bold;
+            margin-top: 4px;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 22px;
+        }
+
+        nav ul li {
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        nav ul li:hover {
+            color: #4CAF50;
+        }
+
+        .logout {
+            color: red;
+        }
+
+        .container {
+            padding: 40px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .card {
+            position: relative;
+            width: 900px;
+            padding: 60px 40px;
+            border-radius: 18px;
+
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(6px);
+
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+            text-align: center;
+            overflow: hidden;
+        }
+
+        .card-logo {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 600px;
+            opacity: 0.18;
+            transform: translate(-50%, -50%);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .card h2,
+        .details {
+            position: relative;
+            z-index: 2;
+        }
+
+        .card h2 {
+            margin-bottom: 30px;
+        }
+
+        .details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .detail-item {
+            font-size: 16px;
+        }
+
+        .detail-item strong {
+            color: #2e7d32;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo-section">
+        <img src="https://hubs.fi/wp-content/uploads/2021/08/Brightlife-logo.png">
+        <span>Teacher</span>
+    </div>
+
+    <nav>
+        <ul>
+            <li onclick="home()">Home</li>
+            <li onclick="profile()">Profile</li>
+            <li onclick="attendance()">Attendance</li>
+            <li onclick="subjects()">Subjects Handling</li>
+            <li onclick="analysis()">Student Analysis</li>
+            <li class="logout" onclick="logout()">Logout</li>
+        </ul>
+    </nav>
+</header>
+
+<div class="container">
+    <div class="card">
+
+        <img class="card-logo"
+             src="https://hubs.fi/wp-content/uploads/2021/08/Brightlife-logo.png"
+             alt="Logo">
+
+        <h2>Teacher Details</h2>
+
+        <div class="details">
+            <div class="detail-item"><strong>Teacher ID:</strong> <span id="teacher_id"></span></div>
+            <div class="detail-item"><strong>Name:</strong> <span id="teacher_name"></span></div>
+            <div class="detail-item"><strong>Email:</strong> <span id="email"></span></div>
+            <div class="detail-item"><strong>Phone:</strong> <span id="phone"></span></div>
+            <div class="detail-item"><strong>Date of Birth:</strong> <span id="dob"></span></div>
+            <div class="detail-item"><strong>Gender:</strong> <span id="gender"></span></div>
+            <div class="detail-item"><strong>Age:</strong> <span id="age"></span></div>
+            <div class="detail-item"><strong>Address:</strong> <span id="address"></span></div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+
+    const teacherEmail = localStorage.getItem("teacherEmail");
+
+    console.log("Teacher Email from localStorage:", teacherEmail);
+
+    if (!teacherEmail) {
+        alert("Session expired. Please login again.");
+        window.location.href = "Tea_Login.html";
+        return;
+    }
+
+    try {
+        const response = await fetch(
+            `http://localhost:3000/teacher/${encodeURIComponent(teacherEmail)}`
+        );
+
+        console.log("Fetch status:", response.status);
+
+        if (!response.ok) {
+            const errData = await response.json();
+            console.error("Server error:", errData);
+            throw new Error(errData.message || "Fetch failed");
+        }
+
+        const data = await response.json();
+        console.log("Teacher data:", data);
+
+        document.getElementById("teacher_id").textContent   = data.teacher_id ?? "-";
+        document.getElementById("teacher_name").textContent = data.teacher_name ?? "-";
+        document.getElementById("email").textContent        = data.email ?? "-";
+        document.getElementById("phone").textContent        = data.phone ?? "-";
+        document.getElementById("dob").textContent          = data.dob_formatted ?? "-";
+        document.getElementById("gender").textContent       = data.gender ?? "-";
+        document.getElementById("age").textContent          = data.age ?? "-";
+        document.getElementById("address").textContent      = data.address ?? "-";
+
+    } catch (error) {
+        console.error("FINAL ERROR:", error);
+        alert("Failed to load teacher details");
+    }
+});
+
+function logout() {
+    localStorage.removeItem("teacherEmail");
+    window.location.href = "Index.html";
+}
+
+function subjects() {
+    window.location.href = "Tea_Subjects.html";
+}
+
+function profile() {
+    window.location.href = "Tea_Profile.html";
+}
+function home() {
+    window.location.href = "Tea_home.html";
+}
+function attendance() {
+    window.location.href = "http://localhost:5000/";
+}
+function analysis() {
+    window.location.href = "Tea_student_analysis.html";
+}
+</script>
+
+</body>
+</html>

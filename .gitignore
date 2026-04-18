@@ -1,0 +1,17 @@
+# Python virtual environment
+venv/
+__pycache__/
+*.pyc
+
+# Node modules
+node_modules/
+
+# Local data/uploads
+uploads/
+attendance.csv
+attendance/
+faces/
+known_faces/
+
+# OS files
+.DS_Store

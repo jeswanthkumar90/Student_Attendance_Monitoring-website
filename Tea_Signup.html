@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Teacher Signup</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            background:
+                linear-gradient(rgba(255,255,255,0.5), rgba(255,255,255,0.5)),
+                url("https://images.unsplash.com/photo-1529070538774-1843cb3265df")
+                no-repeat center center fixed;
+            background-size: cover;
+        }
+
+        .signup-box {
+            width: 520px;
+            background: rgba(255,255,255,0.9);
+            padding: 35px;
+            border-radius: 14px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.25);
+        }
+
+        .signup-logo {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .signup-logo img {
+            height: 70px;
+        }
+
+        .signup-box h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #2e7d32;
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 15px;
+        }
+
+        textarea {
+            resize: none;
+            height: 70px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            background-color: #2e7d32;
+            color: white;
+            border: none;
+            font-size: 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        .submit-btn:hover {
+            background-color: #1b5e20;
+        }
+
+        .login-text {
+            margin-top: 18px;
+            text-align: center;
+            font-size: 15px;
+        }
+
+        .login-text a {
+            color: #2e7d32;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .login-text a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<div class="signup-box">
+
+    <div class="signup-logo">
+        <img src="https://hubs.fi/wp-content/uploads/2021/08/Brightlife-logo.png" alt="Logo">
+    </div>
+
+    <h2>Teacher Signup</h2>
+
+    <form id="teacherSignupForm">
+
+        <div class="form-group">
+            <label>Teacher ID</label>
+            <input type="text" id="teacher_id" required>
+        </div>
+
+        <div class="form-group">
+            <label>Teacher Name</label>
+            <input type="text" id="teacher_name" required>
+        </div>
+
+        <div class="form-group">
+            <label>Phone Number</label>
+            <input type="tel" id="phone" required>
+        </div>
+
+        <div class="form-group">
+            <label>Date of Birth</label>
+            <input type="date" id="dob" required>
+        </div>
+
+        <div class="form-group">
+            <label>Address</label>
+            <textarea id="address"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="email" required>
+        </div>
+
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="password" required>
+        </div>
+
+        <div class="form-group">
+            <label>Age</label>
+            <input type="number" id="age" min="18" required>
+        </div>
+
+        <div class="form-group">
+            <label>Gender</label>
+            <select id="gender" required>
+                <option value="">Select</option>
+                <option>Male</option>
+                <option>Female</option>
+                <option>Other</option>
+            </select>
+        </div>
+
+        <button type="submit" class="submit-btn">Signup</button>
+
+    </form>
+
+    <p class="login-text">
+        Already registered? <a href="Tea_Login.html">Login</a>
+    </p>
+
+</div>
+
+<script>
+document.getElementById("teacherSignupForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const data = {
+        teacher_id: document.getElementById("teacher_id").value,
+        teacher_name: document.getElementById("teacher_name").value,
+        phone: document.getElementById("phone").value,
+        dob: document.getElementById("dob").value,
+        address: document.getElementById("address").value,
+        email: document.getElementById("email").value,
+        password: document.getElementById("password").value,
+        age: document.getElementById("age").value,
+        gender: document.getElementById("gender").value
+    };
+
+    try {
+        const res = await fetch("http://localhost:3000/teacher-signup", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
+        });
+
+        const result = await res.json();
+
+        if (!res.ok) {
+            alert(result.message);
+            return;
+        }
+
+        alert("Teacher signup successful!");
+        window.location.href = "Tea_Login.html";
+
+    } catch (error) {
+        console.error(error);
+        alert("Server error. Please try again.");
+    }
+});
+</script>
+
+
+</body>
+</html>

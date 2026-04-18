@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Student Home</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #c9f9cd, #f4f6f8);
+        }
+
+        header {
+            background-color: rgba(255,255,255,0.9);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 30px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .logo-section {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo-section img {
+            height: 40px;
+        }
+
+        .logo-section span {
+            font-size: 14px;
+            font-weight: bold;
+            margin-top: 4px;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 25px;
+        }
+
+        nav ul li {
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        nav ul li:hover {
+            color: #4CAF50;
+        }
+
+        .logout {
+            color: red;
+        }
+
+        .container {
+            padding: 40px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .card {
+            position: relative;
+            width: 900px;
+            padding: 60px 40px;
+            border-radius: 18px;
+
+            background: rgba(255, 255, 255, 0.021);
+            border: 1px solid rgba(255, 255, 255, 0.183);
+
+            backdrop-filter: blur(6px); 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+
+            text-align: center;
+            overflow: hidden;
+        }
+
+        .card-logo {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 650px;          
+            opacity: 0.22;      
+            transform: translate(-50%, -50%);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .card h2,
+        .details {
+            position: relative;
+            z-index: 2;
+        }
+
+        .card h2 {
+            margin-bottom: 30px;
+        }
+
+        .details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .detail-item {
+            font-size: 16px;
+            text-align: center;
+        }
+
+        .detail-item strong {
+            color: #2e7d32;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo-section">
+        <img src="https://hubs.fi/wp-content/uploads/2021/08/Brightlife-logo.png">
+        <span>Student</span>
+    </div>
+
+    <nav>
+        <ul>
+            <li onclick="home()">Home</li>
+            <li onclick="subjects()">Subjects</li>
+            <li onclick="attendance()">Attendance</li>
+            <li onclick="profile()">Profile</li>
+            <li class="logout" onclick="logout()">Logout</li>
+        </ul>
+    </nav>
+</header>
+
+<div class="container">
+    <div class="card">
+
+        <img
+            class="card-logo"
+            src="https://hubs.fi/wp-content/uploads/2021/08/Brightlife-logo.png"
+            alt="Brightlife Logo"
+        >
+
+        <h2>Student Details</h2>
+
+        <div class="details">
+            <div class="detail-item"><strong>Full Name:</strong> <span id="full_name"></span></div>
+            <div class="detail-item"><strong>Roll No:</strong> <span id="roll_no"></span></div>
+            <div class="detail-item"><strong>Email:</strong> <span id="email"></span></div>
+            <div class="detail-item"><strong>Mobile:</strong> <span id="mobile"></span></div>
+
+            <div class="detail-item"><strong>Father Name:</strong> <span id="father_name"></span></div>
+            <div class="detail-item"><strong>Mother Name:</strong> <span id="mother_name"></span></div>
+            <div class="detail-item"><strong>Father Mobile:</strong> <span id="father_mobile"></span></div>
+            <div class="detail-item"><strong>Mother Mobile:</strong> <span id="mother_mobile"></span></div>
+
+            <div class="detail-item"><strong>Date of Birth:</strong> <span id="dob"></span></div>
+            <div class="detail-item"><strong>Gender:</strong> <span id="gender"></span></div>
+            <div class="detail-item"><strong>Age:</strong> <span id="age"></span></div>
+            <div class="detail-item"><strong>Address:</strong> <span id="address"></span></div>
+        </div>
+    </div>
+</div>
+
+<script>
+const studentEmail = localStorage.getItem("studentEmail");
+
+if (!studentEmail) {
+    alert("Session expired. Please login again.");
+    window.location.href = "student-login.html";
+}
+
+fetch(`http://localhost:3000/student/${encodeURIComponent(studentEmail)}`)
+    .then(res => {
+        if (!res.ok) {
+            throw new Error("Failed to fetch student");
+        }
+        return res.json();
+    })
+    .then(data => {
+        document.getElementById("full_name").innerText = data.full_name || "-";
+        document.getElementById("roll_no").innerText = data.roll_no || "-";
+        document.getElementById("email").innerText = data.email || "-";
+        document.getElementById("mobile").innerText = data.mobile || "-";
+        document.getElementById("father_name").innerText = data.father_name || "-";
+        document.getElementById("mother_name").innerText = data.mother_name || "-";
+        document.getElementById("father_mobile").innerText = data.father_mobile || "-";
+        document.getElementById("mother_mobile").innerText = data.mother_mobile || "-";
+
+        document.getElementById("dob").innerText = data.dob_formatted || "-";
+
+        document.getElementById("gender").innerText = data.gender || "-";
+        document.getElementById("age").innerText = data.age || "-";
+        document.getElementById("address").innerText = data.address || "-";
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Failed to load student details");
+    });
+
+function logout() {
+    localStorage.removeItem("studentEmail");
+    window.location.href = "Index.html";
+}
+function profile() {
+    window.location.href = "Stu_Profile.html";
+}
+function home() {
+    window.location.href = "Stu_home.html";
+}
+function subjects() {
+    window.location.href = "Stu_Subjects.html";
+}
+function attendance() {
+    window.location.href = "Stu_attendance.html";
+}
+</script>
+
+</body>
+</html>

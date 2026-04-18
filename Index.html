@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Home Page</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            height: 100vh;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #c9f9cd, #f4f6f8);
+        }
+
+        .container {
+            display: flex;
+            height: 100%;
+            padding: 20px;
+        }
+
+        .logo-section {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .logo-section img {
+            max-width: 550px;
+            width: 100%;
+        }
+
+        .right-boxes {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .box {
+            width: 220px;
+            height: 80px;
+            background-color: #4CAF50;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 8px;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .box:hover {
+            background-color: #43a047;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="logo-section">
+        <img src="https://hubs.fi/wp-content/uploads/2021/08/Brightlife-logo.png" alt="Company Logo">
+    </div>
+
+    <div class="right-boxes">
+        <div class="box" onclick="goToStudentLogin()">Student</div>
+        <div class="box" onclick="goToTeacherLogin()">Teacher</div>
+        <div class="box" onclick="goToParentLogin()">Parent</div>
+    </div>
+
+</div>
+
+<script>
+    function goToStudentLogin() {
+        window.location.href = "Stu_Login.html";
+    }
+        function goToTeacherLogin() {
+        window.location.href = "Tea_Login.html";
+    }
+     function goToParentLogin() {
+        window.location.href = "Par_Login.html";
+    }
+</script>
+
+</body>
+</html>

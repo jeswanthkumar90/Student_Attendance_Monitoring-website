@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Student Subjects Registration</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(to right, #e3f2fd, #f1f8ff);
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+    padding: 60px;
+}
+
+.card {
+    width: 700px;
+    padding: 40px;
+    border-radius: 18px;
+    background: rgba(255,255,255,0.25);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+select {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    font-size: 15px;
+}
+
+button {
+    margin-top: 20px;
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+    border: none;
+    background: #1976d2;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+button:disabled {
+    background: gray;
+}
+
+.subject-box {
+    margin-top: 30px;
+    padding: 20px;
+    background: #e3f2fd;
+    border-radius: 10px;
+}
+
+.subject-box li {
+    font-size: 16px;
+    margin: 6px 0;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<div class="card">
+
+<h2>Register Subjects</h2>
+
+<div id="formSection">
+
+    <select class="subject">
+        <option value="">Select Subject 1</option>
+        <option>Telugu</option>
+        <option>Hindi</option>
+        <option>English</option>
+        <option>Maths</option>
+        <option>Physics</option>
+        <option>Chemistry</option>
+        <option>Biology</option>
+        <option>Social</option>
+    </select>
+
+    <select class="subject">
+        <option value="">Select Subject 2</option>
+        <option>Telugu</option>
+        <option>Hindi</option>
+        <option>English</option>
+        <option>Maths</option>
+        <option>Physics</option>
+        <option>Chemistry</option>
+        <option>Biology</option>
+        <option>Social</option>
+    </select>
+
+    <select class="subject">
+        <option value="">Select Subject 3</option>
+        <option>Telugu</option>
+        <option>Hindi</option>
+        <option>English</option>
+        <option>Maths</option>
+        <option>Physics</option>
+        <option>Chemistry</option>
+        <option>Biology</option>
+        <option>Social</option>
+    </select>
+
+    <select class="subject">
+        <option value="">Select Subject 4</option>
+        <option>Telugu</option>
+        <option>Hindi</option>
+        <option>English</option>
+        <option>Maths</option>
+        <option>Physics</option>
+        <option>Chemistry</option>
+        <option>Biology</option>
+        <option>Social</option>
+    </select>
+
+    <select class="subject">
+        <option value="">Select Subject 5</option>
+        <option>Telugu</option>
+        <option>Hindi</option>
+        <option>English</option>
+        <option>Maths</option>
+        <option>Physics</option>
+        <option>Chemistry</option>
+        <option>Biology</option>
+        <option>Social</option>
+    </select>
+
+    <select class="subject">
+        <option value="">Select Subject 6</option>
+        <option>Telugu</option>
+        <option>Hindi</option>
+        <option>English</option>
+        <option>Maths</option>
+        <option>Physics</option>
+        <option>Chemistry</option>
+        <option>Biology</option>
+        <option>Social</option>
+    </select>
+
+    <select class="subject">
+        <option value="">Select Subject 7</option>
+        <option>Telugu</option>
+        <option>Hindi</option>
+        <option>English</option>
+        <option>Maths</option>
+        <option>Physics</option>
+        <option>Chemistry</option>
+        <option>Biology</option>
+        <option>Social</option>
+    </select>
+
+    <select class="subject">
+        <option value="">Select Subject 8</option>
+        <option>Telugu</option>
+        <option>Hindi</option>
+        <option>English</option>
+        <option>Maths</option>
+        <option>Physics</option>
+        <option>Chemistry</option>
+        <option>Biology</option>
+        <option>Social</option>
+    </select>
+
+    <button onclick="registerSubjects()">Register Subjects</button>
+</div>
+
+<div id="displaySection" style="display:none">
+    <h3>Your Registered Subjects</h3>
+    <ul id="subjectList"></ul>
+</div>
+
+</div>
+</div>
+
+<script>
+const studentEmail = localStorage.getItem("studentEmail");
+
+if (!studentEmail) {
+    alert("Session expired");
+    window.location.href = "student-login.html";
+}
+
+const formSection = document.getElementById("formSection");
+const displaySection = document.getElementById("displaySection");
+const subjectList = document.getElementById("subjectList");
+
+fetch(`http://localhost:3000/student-subjects/${encodeURIComponent(studentEmail)}`)
+.then(res => res.json())
+.then(subjects => {
+    if (subjects.length > 0) {
+        showSubjects(subjects);
+    }
+});
+
+function registerSubjects() {
+    const selects = document.querySelectorAll(".subject");
+    const subjects = Array.from(selects).map(s => s.value);
+
+    if (subjects.includes("")) {
+        alert("Please select all 8 subjects");
+        return;
+    }
+
+    const unique = new Set(subjects);
+    if (unique.size !== subjects.length) {
+        alert("Duplicate subjects are not allowed");
+        return;
+    }
+
+    fetch("http://localhost:3000/student-subjects", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: studentEmail, subjects })
+    })
+    .then(res => {
+        if (!res.ok) throw new Error("Already registered");
+        return res.json();
+    })
+    .then(() => {
+        showSubjects(subjects);
+    })
+    .catch(err => {
+        alert("Subjects already registered");
+    });
+}
+
+function showSubjects(subjects) {
+    formSection.style.display = "none";
+    displaySection.style.display = "block";
+
+    subjectList.innerHTML = "";
+    subjects.forEach(sub => {
+        const li = document.createElement("li");
+        li.textContent = sub;
+        subjectList.appendChild(li);
+    });
+}
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Teacher Login</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            height: 100vh;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            background:
+                linear-gradient(
+                    rgba(255,255,255,0.5),
+                    rgba(255,255,255,0.5)
+                ),
+                url("https://images.unsplash.com/photo-1529070538774-1843cb3265df")
+                no-repeat center center fixed;
+            background-size: cover;
+        }
+
+        .login-box {
+            width: 420px;
+            min-height: 480px;
+            padding: 35px;
+
+            background: rgba(255,255,255,0.85);
+            border-radius: 14px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.25);
+
+            text-align: center;
+        }
+
+        .login-logo img {
+            height: 80px;
+            margin-bottom: 15px;
+        }
+
+        .login-box h2 {
+            margin-bottom: 25px;
+            color: #2e7d32;
+        }
+
+        .login-box input {
+            width: 100%;
+            padding: 14px;
+            margin: 12px 0;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+
+        .login-box button {
+            width: 100%;
+            padding: 14px;
+            background-color: #2e7d32;
+            border: none;
+            color: white;
+            font-size: 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        .login-box button:hover {
+            background-color: #1b5e20;
+        }
+
+        .signup-text {
+            margin-top: 20px;
+            font-size: 15px;
+        }
+
+        .signup-text a {
+            color: #2e7d32;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .signup-text a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="login-box">
+
+    <div class="login-logo">
+        <img src="https://hubs.fi/wp-content/uploads/2021/08/Brightlife-logo.png" alt="Logo">
+    </div>
+
+    <h2>Teacher Login</h2>
+
+    <input type="email" id="email" placeholder="Email" required>
+    <input type="password" id="password" placeholder="Password" required>
+
+    <button onclick="teacherLogin()">Login</button>
+
+    <p class="signup-text">
+        New teacher? <a href="Tea_Signup.html">Signup</a>
+    </p>
+
+</div>
+
+<script>
+async function teacherLogin() {
+    const emailInput = document.getElementById("email");
+    const passwordInput = document.getElementById("password");
+
+    const email = emailInput.value.trim();
+    const password = passwordInput.value.trim();
+
+    if (!email || !password) {
+        alert("Please enter email and password");
+        return;
+    }
+
+    try {
+        const response = await fetch("http://localhost:3000/teacher-login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.json();
+
+        console.log("Login response =", data);
+
+        if (!response.ok) {
+            alert(data.message || "Login failed");
+            return;
+        }
+
+        if (!data.email) {
+            alert("Login failed: email not returned from server");
+            return;
+        }
+
+        localStorage.setItem("teacherEmail", data.email);
+
+        console.log("Saved teacherEmail =", data.email);
+
+        window.location.href = "Tea_home.html";
+
+    } catch (err) {
+        console.error("Login error:", err);
+        alert("Server error. Please try again.");
+    }
+}
+</script>
+
+</body>
+</html>

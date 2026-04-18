@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Student Analysis</title>
+
+<style>
+
+body {
+            font-family: Arial, sans-serif;
+            background:
+                linear-gradient(rgba(255, 255, 255, 0.432), rgba(255, 255, 255, 0.409)),
+                url("https://images.unsplash.com/photo-1529070538774-1843cb3265df")
+                no-repeat center center fixed;
+            background-size: cover;
+        }
+
+.container{
+display:grid;
+grid-template-columns:repeat(auto-fill,200px);
+gap:25px;
+justify-content:center;
+}
+
+.card{
+background:white;
+padding:20px;
+border-radius:10px;
+box-shadow:0 0 10px rgba(0,0,0,0.15);
+text-align:center;
+}
+
+.card img{
+width:80px;
+height:80px;
+border-radius:50%;
+object-fit:cover;
+margin-bottom:10px;
+}
+
+.name{
+font-weight:bold;
+font-size:16px;
+}
+
+.roll{
+color:#555;
+margin-bottom:10px;
+}
+
+.percentage{
+font-size:18px;
+font-weight:bold;
+}
+
+.status{
+width:14px;
+height:14px;
+border-radius:50%;
+display:inline-block;
+margin-left:6px;
+}
+
+.green{background:#4CAF50;}
+.yellow{background:#FFC107;}
+.red{background:#F44336;}
+
+</style>
+
+</head>
+
+<body>
+
+<h2 style="text-align:center;">Student Analysis</h2>
+
+<div class="container" id="studentsContainer"></div>
+
+<script>
+
+const teacherEmail = localStorage.getItem("teacherEmail");
+
+let subject="";
+
+
+fetch(`http://localhost:3000/teacher-subject/${teacherEmail}`)
+.then(res=>res.json())
+.then(data=>{
+
+subject=data.subject;
+
+loadStudents();
+
+});
+
+
+function loadStudents(){
+
+fetch(`http://localhost:3000/student-analysis/${subject}`)
+.then(res=>res.json())
+.then(data=>{
+
+const container=document.getElementById("studentsContainer");
+
+container.innerHTML="";
+
+data.forEach(student=>{
+
+let color="red";
+
+if(student.percentage>=80)
+color="green";
+
+else if(student.percentage>=65)
+color="yellow";
+
+container.innerHTML+=`
+
+<div class="card">
+
+<img src="http://localhost:3000${student.profile_photo}" />
+
+<div class="name">${student.full_name}</div>
+
+<div class="roll">${student.roll_no}</div>
+
+<div class="percentage">
+
+${student.percentage || 0}% 
+
+<span class="status ${color}"></span>
+
+</div>
+
+</div>
+
+`;
+
+});
+
+});
+
+}
+
+</script>
+
+</body>
+</html>

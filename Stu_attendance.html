@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Student Attendance</title>
+
+<style>
+
+body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #c9f9cd, #f4f6f8);
+            text-align: center;
+        }
+
+.container{
+width:700px;
+margin:auto;
+}
+
+.card{
+border:1px solid #ccc;
+padding:20px;
+margin:20px;
+border-radius:10px;
+background:white;
+}
+
+.subject{
+font-size:22px;
+font-weight:bold;
+margin-bottom:10px;
+}
+
+.box{
+display:flex;
+justify-content:space-between;
+margin:8px 0;
+font-size:18px;
+}
+
+.percent{
+color:#2e7d32;
+font-weight:bold;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h2>My Attendance</h2>
+
+<div class="container" id="attendanceContainer"></div>
+
+<script>
+
+const studentEmail = localStorage.getItem("studentEmail");
+
+if(!studentEmail){
+
+alert("Session expired");
+window.location.href="Stu_Login.html";
+
+}
+
+
+fetch(`http://localhost:3000/student/${studentEmail}`)
+.then(res=>res.json())
+.then(student=>{
+
+const roll = student.roll_no;
+
+loadAttendance(roll);
+
+});
+
+
+
+function loadAttendance(roll){
+
+fetch(`http://localhost:3000/student-attendance/${roll}`)
+.then(res=>res.json())
+.then(data=>{
+
+const container=document.getElementById("attendanceContainer");
+
+data.forEach(sub=>{
+
+container.innerHTML+=`
+
+<div class="card">
+
+<div class="subject">${sub.subject}</div>
+
+<div class="box">
+<span>Classes Attended</span>
+<span>${sub.attended}</span>
+</div>
+
+<div class="box">
+<span>Total Classes</span>
+<span>${sub.total}</span>
+</div>
+
+<div class="box percent">
+<span>Attendance Percentage</span>
+<span>${sub.percentage}%</span>
+</div>
+
+</div>
+
+`;
+
+});
+
+});
+
+}
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Attendance Result</title>
+
+<style>
+
+body {
+            font-family: Arial, sans-serif;
+            background:
+                linear-gradient(rgba(255, 255, 255, 0.432), rgba(255, 255, 255, 0.409)),
+                url("https://images.unsplash.com/photo-1529070538774-1843cb3265df")
+                no-repeat center center fixed;
+            background-size: cover;
+            text-align: center;
+        }
+
+table{
+margin:auto;
+border-collapse:collapse;
+width:60%;
+}
+
+th,td{
+padding:12px;
+border:1px solid #ccc;
+}
+
+.present{
+color:green;
+font-weight:bold;
+}
+
+.absent{
+color:red;
+font-weight:bold;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h2>Attendance Result</h2>
+
+<table id="attendanceTable">
+
+<tr>
+<th>Roll No</th>
+<th>Name</th>
+<th>Status</th>
+</tr>
+
+</table>
+
+<br>
+
+<button onclick="saveAttendance()">Save Attendance</button>
+
+<script>
+
+const teacherEmail = localStorage.getItem("teacherEmail");
+
+let subject = "";
+let attendanceData = [];
+
+fetch(`http://localhost:3000/teacher-subject/${teacherEmail}`)
+.then(res=>res.json())
+.then(data=>{
+
+subject = data.subject;
+
+loadAttendance();
+
+});
+
+function loadAttendance(){
+
+fetch(`http://localhost:3000/attendance-result/${subject}`)
+.then(res=>res.json())
+.then(data=>{
+
+attendanceData = data;
+
+const table = document.getElementById("attendanceTable");
+
+data.forEach(student=>{
+
+table.innerHTML += `
+<tr>
+<td>${student.roll_no}</td>
+<td>${student.full_name}</td>
+<td class="${student.status=='Present'?'present':'absent'}">
+${student.status}
+</td>
+</tr>
+`;
+
+});
+
+});
+
+}
+
+function saveAttendance(){
+
+fetch("http://localhost:3000/save-attendance",{
+
+method:"POST",
+headers:{"Content-Type":"application/json"},
+
+body:JSON.stringify({
+subject:subject,
+attendance:attendanceData
+})
+
+})
+.then(res=>res.json())
+.then(data=>{
+alert(data.message);
+});
+
+}
+
+</script>
+
+</body>
+</html>

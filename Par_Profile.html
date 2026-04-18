@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Parent Profile</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(to right, #c9eef9, #f4f6f8);
+}
+
+header {
+    background-color: rgba(255,255,255,0.9);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 30px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.logo-section img {
+    height: 40px;
+}
+
+nav ul {
+    list-style: none;
+    display: flex;
+    gap: 25px;
+}
+
+nav ul li {
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.logout {
+    color: red;
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+    padding: 40px;
+}
+
+.profile-card {
+    width: 850px;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(8px);
+    border-radius: 18px;
+    padding: 40px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+    text-align: center;
+}
+
+.profile-photo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.profile-photo img {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    border: 5px solid #4CAF50;
+    object-fit: cover;
+}
+
+.profile-photo label {
+    margin-top: 10px;
+    color: #2e7d32;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.profile-photo input {
+    display: none;
+}
+
+.details {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.detail-item {
+    font-size: 16px;
+}
+
+.detail-item strong {
+    color: #2e7d32;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <div class="logo-section">
+        <img src="https://hubs.fi/wp-content/uploads/2021/08/Brightlife-logo.png">
+    </div>
+
+    <nav>
+        <ul>
+            <li onclick="location.href='Par_home.html'">Home</li>
+            <li>Profile</li>
+            <li>Child Suggestions</li>
+            <li>Subject of Child</li>
+            <li class="logout" onclick="logout()">Logout</li>
+        </ul>
+    </nav>
+</header>
+
+<div class="container">
+<div class="profile-card">
+
+    <div class="profile-photo">
+        <img id="profileImg"
+             src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
+        <label for="photoUpload">Change Photo</label>
+        <input type="file" id="photoUpload" accept="image/*">
+    </div>
+
+    <div class="details">
+        <div class="detail-item"><strong>Parent Name:</strong> <span id="parent_name"></span></div>
+        <div class="detail-item"><strong>Email:</strong> <span id="email"></span></div>
+        <div class="detail-item"><strong>Phone:</strong> <span id="phone"></span></div>
+        <div class="detail-item"><strong>Parent Type:</strong> <span id="parent_type"></span></div>
+        <div class="detail-item"><strong>Child Roll No:</strong> <span id="child_roll_no"></span></div>
+        <div class="detail-item"><strong>Address:</strong> <span id="address"></span></div>
+    </div>
+
+</div>
+</div>
+
+<script>
+const parentEmail = localStorage.getItem("parentEmail");
+const profileImg = document.getElementById("profileImg");
+
+if (!parentEmail) {
+    alert("Session expired. Please login again.");
+    window.location.href = "Par_Login.html";
+}
+
+profileImg.src = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+
+fetch(`http://localhost:3000/parent/${encodeURIComponent(parentEmail)}`)
+.then(res => res.json())
+.then(data => {
+
+    if (data.profile_photo) {
+        profileImg.src = `http://localhost:3000${data.profile_photo}`;
+    }
+
+    document.getElementById("parent_name").innerText   = data.parent_name || "-";
+    document.getElementById("email").innerText         = data.email || "-";
+    document.getElementById("phone").innerText         = data.phone || "-";
+    document.getElementById("parent_type").innerText   = data.parent_type || "-";
+    document.getElementById("child_roll_no").innerText = data.child_roll_no || "-";
+    document.getElementById("address").innerText       = data.address || "-";
+});
+
+document.getElementById("photoUpload").addEventListener("change", async e => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("photo", file);
+
+    const res = await fetch(
+        `http://localhost:3000/parent/upload-photo/${parentEmail}`,
+        { method: "POST", body: formData }
+    );
+
+    const data = await res.json();
+    profileImg.src = `http://localhost:3000${data.photo}`;
+});
+
+function logout() {
+    localStorage.removeItem("parentEmail");
+    window.location.href = "Index.html";
+}
+</script>
+
+</body>
+</html>

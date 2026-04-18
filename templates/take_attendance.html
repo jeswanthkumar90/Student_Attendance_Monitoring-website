@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Take Attendance</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background:
+        linear-gradient(rgba(255,255,255,0.432), rgba(255,255,255,0.409)),
+        url("https://images.unsplash.com/photo-1529070538774-1843cb3265df")
+        no-repeat center center fixed;
+    background-size: cover;
+}
+
+video {
+    border: 3px solid #4CAF50;
+    border-radius: 10px;
+}
+
+button {
+    padding: 12px 25px;
+    font-size: 16px;
+    margin: 10px;
+}
+
+#result, #fpStatus {
+    font-size: 18px;
+    margin-top: 10px;
+}
+</style>
+
+</head>
+
+<body>
+
+<h2>Take Attendance (Face + Fingerprint)</h2>
+
+<video id="video" width="400" height="300" autoplay playsinline></video>
+<br><br>
+
+<button onclick="scanFingerprint()">Scan Fingerprint</button>
+<p id="fpStatus"> Fingerprint not scanned</p>
+
+<button onclick="takeAttendance()">Scan Face</button>
+
+<button onclick="submitAttendance()">Submit Attendance</button>
+
+<canvas id="canvas" width="400" height="300" style="display:none;"></canvas>
+
+<p id="result"></p>
+
+<script>
+
+const video = document.getElementById("video");
+let scannedFingerprint = "";
+
+navigator.mediaDevices.getUserMedia({
+    video: { facingMode: "user" }
+})
+.then(stream => {
+    video.srcObject = stream;
+})
+.catch(() => {
+    alert(" Camera access denied");
+});
+
+function scanFingerprint() {
+    document.getElementById("fpStatus").innerText = " Initializing device...";
+
+    fetch("/capture-fingerprint") 
+    .then(res => res.text())
+    .then(data => {
+        if (data.includes('errCode="0"')) {
+            scannedFingerprint = data; 
+            document.getElementById("fpStatus").innerText = " Fingerprint scanned";
+            document.getElementById("fpStatus").style.color = "green";
+        } else {
+            document.getElementById("fpStatus").innerText = " Failed to scan";
+            document.getElementById("fpStatus").style.color = "red";
+        }
+    })
+    .catch(err => {
+        alert("Fingerprint bridge failed");
+    });
+}
+
+function takeAttendance() {
+
+    if (!scannedFingerprint) {
+        alert("Please scan fingerprint first");
+        return;
+    }
+
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    canvas.toBlob(blob => {
+
+        const formData = new FormData();
+        formData.append("image", blob);
+        formData.append("fingerprint", scannedFingerprint); 
+
+        fetch("http://127.0.0.1:5000/take-attendance", {
+            method: "POST",
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+
+            if (data.status === "Present") {
+
+                document.getElementById("result").innerText =
+                    ` ${data.name} (${data.roll}) Present`;
+
+            } else if (data.status === "Fingerprint Mismatch") {
+
+                document.getElementById("result").innerText =
+                    " Fingerprint does not match";
+
+            } else {
+
+                document.getElementById("result").innerText =
+                    " Unknown Face";
+            }
+
+        })
+        .catch(() => {
+            alert(" Server error");
+        });
+
+    }, "image/jpeg");
+}
+
+function submitAttendance() {
+    window.location.href = "http://localhost:3000/attendance_result.html";
+}
+
+</script>
+
+</body>
+</html>
